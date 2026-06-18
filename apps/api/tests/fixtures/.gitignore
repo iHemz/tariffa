@@ -1,0 +1,6 @@
+# Keep real sample documents (and the generated synthetic PDF) out of git;
+# track only this dir's docs and the generator script.
+*
+!.gitignore
+!README.md
+!generate_sample_invoice.py
