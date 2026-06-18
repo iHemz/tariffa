@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Design Shotgun — {{FEATURE}} variants</title>
+<style>
+  :root {
+    --bg: #f1f3f5;
+    --surface: #ffffff;
+    --surface-2: #f8f9fa;
+    --border: #dee2e6;
+    --border-strong: #ced4da;
+    --text: #212529;
+    --dimmed: #868e96;
+    --accent: #4263eb;        /* NEUTRAL "interactive affordance" placeholder — NOT a brand color */
+    --accent-soft: #edf2ff;
+    --good: #2f9e44;          /* used only to mark the selected winner */
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.45; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .topbar h1 { font-size: 14px; margin: 0; font-weight: 650; }
+  .topbar .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill {
+    text-decoration: none; color: var(--text); font-size: 12px; font-weight: 600;
+    border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 11px; background: var(--surface);
+  }
+  .pill.win { border-color: var(--good); color: var(--good); }
+  .pill .sc { color: var(--dimmed); font-weight: 500; }
+
+  /* ---------- layout ---------- */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+  .intro { margin: 8px 0 28px; }
+  .intro h2 { font-size: 22px; margin: 0 0 6px; }
+  .intro p { color: var(--dimmed); font-size: 13.5px; max-width: 760px; margin: 4px 0; }
+  .note {
+    margin-top: 14px; font-size: 12.5px; color: #5c5f66;
+    background: #fff9db; border: 1px solid #ffe066; border-radius: 8px; padding: 9px 13px; max-width: 760px;
+  }
+
+  .variant { margin: 0 0 26px; }
+  .vhead { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
+  .vhead h3 { font-size: 16px; margin: 0; }
+  .badge {
+    font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 2px 9px;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .badge.win { background: #ebfbee; color: var(--good); }
+  .tag-selected {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: #fff; background: var(--good); border-radius: 5px; padding: 2px 7px;
+  }
+
+  .grid { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 18px; align-items: start; }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+
+  /* ---------- the "screen" (a fake browser window) ---------- */
+  .screen {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .screen.win { border-color: var(--good); }   /* the selected variant */
+  .chrome {
+    background: var(--surface-2); border-bottom: 1px solid var(--border);
+    padding: 7px 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border-strong); }
+  .url { margin-left: 8px; font-size: 11px; color: var(--dimmed); }
+  .canvas { padding: 26px 30px 30px; }
+  .stack > * + * { margin-top: 14px; }   /* vertical rhythm inside a canvas */
+
+  /* =====================================================================
+     GENERIC WIREFRAME BUILDING BLOCKS — compose a variant from these.
+     Greyscale primitives only; the accent is a neutral affordance hint.
+     Mix, omit, and repeat freely to express each layout direction.
+     ===================================================================== */
+
+  /* headings + faux text */
+  .h-title { font-size: 19px; font-weight: 650; }
+  .h-sub { font-size: 12.5px; color: var(--dimmed); margin-top: 3px; }
+  .blk-label { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--dimmed); margin-bottom: 5px; }
+  .text-line { height: 9px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--border); }
+  .text-line.med { width: 65%; } .text-line.short { width: 40%; }
+
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: #fff; background: var(--accent); border-radius: 8px; padding: 6px 14px; }
+  .btn.secondary { color: #495057; background: var(--surface-2); border: 1px solid var(--border); }
+  .iconbtn { font-size: 12px; color: #5c5f66; border: 1px solid var(--border); border-radius: 7px; padding: 4px 9px; background: var(--surface-2); }
+  .toolrow { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .spacer { flex: 1; }
+
+  /* inputs / fields */
+  .field { border: 1.5px solid var(--border-strong); border-radius: 10px; padding: 12px 13px; font-size: 13px; color: var(--dimmed); background: #fff; }
+  .field.focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }   /* the focused/primary input */
+  .dropzone { border: 2px dashed var(--border-strong); border-radius: 10px; padding: 26px 14px; text-align: center; font-size: 12.5px; color: #5c5f66; background: var(--surface-2); }
+
+  /* chips / pills row */
+  .rail { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .chip { font-size: 12px; font-weight: 500; border: 1px solid var(--border-strong); border-radius: 999px; padding: 5px 12px; background: var(--surface); color: #495057; }
+  .chip.add { border-style: dashed; color: #5c5f66; }
+  .chip.on { background: var(--accent-soft); border-color: #bac8ff; color: var(--accent); font-weight: 600; }
+
+  /* selectable tiles */
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .tile { border: 1px solid var(--border); border-radius: 10px; padding: 16px 14px; background: var(--surface); }
+  .tile.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .tile .t { font-size: 13px; font-weight: 650; }
+  .tile .d { font-size: 11px; color: var(--dimmed); margin-top: 4px; }
+
+  /* card / thumbnail grid */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+  .card-ph { border: 1px solid var(--border); border-radius: 8px; height: 64px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--dimmed); }
+
+  /* segmented control / tabs */
+  .segmented { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 9px; overflow: hidden; background: var(--surface-2); }
+  .segmented div { font-size: 12.5px; font-weight: 600; padding: 7px 18px; color: #5c5f66; }
+  .segmented div.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  /* data table */
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.tbl th, table.tbl td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  table.tbl th { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--dimmed); background: var(--surface-2); }
+
+  /* misc layout helpers */
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .collapsed-hint { font-size: 11.5px; color: var(--dimmed); display: flex; align-items: center; gap: 6px; }
+  .banner { font-size: 12.5px; color: #5c5f66; border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px; background: var(--surface-2); }
+
+  /* ---------- meta / scoring panel (right column) ---------- */
+  .meta { font-size: 12.5px; }
+  .meta .row { margin-bottom: 12px; }
+  .meta .k { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--dimmed); margin-bottom: 2px; }
+  .meta .v { color: #343a40; }
+  .scoretable { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 6px; }
+  .scoretable td { padding: 3px 0; }
+  .scoretable td:last-child { text-align: right; font-weight: 600; }
+  .scoretable tr.total td { border-top: 1px solid var(--border); padding-top: 6px; font-weight: 700; }
+</style>
+</head>
+<body>
+  <!--
+    ================================================================
+    DESIGN SHOTGUN — lo-fi variant deck.  Replace every {{token}}.
+    • Compose each .screen from the building-block classes above
+      (.field, .chip/.rail, .tiles, .segmented, .dropzone, .cards,
+      table.tbl, .btn, .h-title, .text-line …). Greyscale only.
+    • These are WIREFRAMES — layout + reading order, not brand.
+      Do NOT introduce real colors, fonts, or production JSX.
+      Real screens use the Tailwind CSS v4 theme.
+    • Keep the #shotgun-meta block below in sync with the rendered
+      variants: it is the machine contract the downstream UX
+      write-up reads to find the selected variant.
+    ================================================================
+  -->
+
+  <!-- ⬇ MACHINE-READABLE CONTRACT — downstream reads selected_variant from here -->
+  <script type="application/json" id="shotgun-meta">
+  {
+    "feature": "{{FEATURE}}",
+    "prd": "{{PRD_PATH_OR_NULL}}",
+    "selected_variant": {{WINNER_N}},
+    "selection_mode": "{{auto|user|escalated}}",
+    "variants": [
+      { "n": 1, "name": "{{name}}", "scores": { "click": 0, "states": 0, "async": 0, "persona": 0, "total": 0 } }
+    ],
+    "selection_rationale": "{{1-2 sentences on why the winner won (and any runner-up note)}}"
+  }
+  </script>
+
+  <header class="topbar">
+    <h1>Design Shotgun · {{FEATURE}}</h1>
+    <nav class="nav">
+      <!-- one pill per variant; add class="win" and a ★ to the selected one -->
+      <a class="pill" href="#v1">V1 <span class="sc">{{total}}</span></a>
+      <a class="pill win" href="#vN">VN ★ <span class="sc">{{total}}</span></a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <div class="intro">
+      <h2>{{Headline — what these variants explore, in plain words}}</h2>
+      <p>{{1-2 sentences: the job each variant is trying to do + which persona lens you sanity-checked against}}</p>
+      <div class="note">⚠ Lo-fi wireframe — layout and reading order only. Not final brand colors, copy, or components. The accent blue is a generic “interactive affordance” placeholder; real screens use the Tailwind CSS v4 theme.</div>
+    </div>
+
+    <!-- ============ duplicate this <section> once per variant ============ -->
+    <section class="variant" id="v1">
+      <div class="vhead">
+        <h3>Variant 1 — {{evocative name}}</h3>
+        <span class="badge">{{total}} / 12</span>
+        <!-- on the winner add: class="badge win" above, plus: <span class="tag-selected">Selected</span> -->
+      </div>
+      <div class="grid">
+        <!-- LEFT: the rendered wireframe. Add class="win" to .screen for the winner. -->
+        <div class="screen">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">{{app route, e.g. /shipments/new}}</span></div>
+          <div class="canvas stack">
+            {{COMPOSE THE LAYOUT HERE from the building blocks — this is the variant}}
+          </div>
+        </div>
+        <!-- RIGHT: rationale + the First-Run score -->
+        <div class="meta">
+          <div class="row"><div class="k">Concept</div><div class="v">{{one sentence — what makes this direction distinct}}</div></div>
+          <div class="row"><div class="k">Tradeoff</div><div class="v">{{what it gives up}}</div></div>
+          <div class="row"><div class="k">Fits</div><div class="v">{{persona + 1-line justification}}</div></div>
+          <table class="scoretable">
+            <tr><td>Click</td><td>{{0-3}}</td></tr>
+            <tr><td>States</td><td>{{0-3}}</td></tr>
+            <tr><td>Async</td><td>{{0-3}}</td></tr>
+            <tr><td>Persona</td><td>{{0-3}}</td></tr>
+            <tr class="total"><td>Total</td><td>{{0-12}}</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
