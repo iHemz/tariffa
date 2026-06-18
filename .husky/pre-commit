@@ -1,0 +1,25 @@
+#!/bin/sh
+# tariffa pre-commit quality gate.
+# Fails the commit if frontend lint/format/types or backend Python checks don't pass.
+
+set -e
+
+# 1. Lint + format staged frontend files (eslint --fix, prettier --write).
+pnpm exec lint-staged
+
+# 2. Full TypeScript check on the web app (tsc needs the whole project, not just staged files).
+pnpm --filter web run typecheck
+
+# 3. File/folder naming conventions for the web app.
+node .husky/naming-check.mjs
+
+# 4. Python backend checks — only if .py files under apps/api are staged and uv is available.
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM -- 'apps/api/**/*.py')
+if [ -n "$STAGED_PY" ]; then
+  if command -v uv >/dev/null 2>&1; then
+    echo "Running ruff on staged Python files..."
+    (cd apps/api && uv run ruff check . && uv run ruff format --check .)
+  else
+    echo "⚠️  Staged Python changes detected but 'uv' was not found — skipping ruff. Install uv to enable backend checks."
+  fi
+fi

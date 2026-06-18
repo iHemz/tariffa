@@ -1,0 +1,15 @@
+# Build output
+.next/
+out/
+build/
+dist/
+
+# Dependencies
+node_modules/
+
+# Python backend — formatted by ruff, not Prettier
+apps/api/
+
+# Lockfiles & generated
+pnpm-lock.yaml
+*.log
