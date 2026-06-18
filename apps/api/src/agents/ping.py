@@ -45,5 +45,7 @@ def get_ping_agent() -> Agent[None, Ping]:
 
 async def run_ping() -> Ping:
     """Run the agent once and return its typed output."""
-    result = await get_ping_agent().run("Say hello and confirm the agent pipeline is wired up.")
+    result = await get_ping_agent().run(
+        "Say hello and confirm the agent pipeline is wired up."
+    )
     return result.output
