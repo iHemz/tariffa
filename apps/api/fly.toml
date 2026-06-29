@@ -1,0 +1,30 @@
+# Fly.io config for the Tariffa API. Run `fly deploy` from this directory (apps/api).
+# See docs/08-deployment.md for the full walkthrough.
+
+# Globally-unique app name. `fly launch`/`fly apps create` sets this — change it to your app's name.
+app = "tariffa-api"
+
+# Johannesburg — the closest Fly region to Nigeria (lowest latency for the target users).
+primary_region = "jnb"
+
+[build]
+  # Uses the Dockerfile in this directory.
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Scale to zero when idle to keep a side project cheap; first request after idle has a cold start.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"  # pydantic-ai + FastAPI; drop to 512mb if you want to trim cost and don't hit OOM.

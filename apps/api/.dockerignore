@@ -1,0 +1,11 @@
+# Keep the build context (and image) small and free of local-only artifacts.
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+tests/fixtures/*.pdf
+Dockerfile
+.dockerignore
