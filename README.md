@@ -9,6 +9,9 @@ port delays, and drafts a Form M prep sheet.
 It does **not** submit anything to a government system — output is a draft the user or their broker
 files through the official channel (NICIS / Trade Window).
 
+> **Plays:** the product, career, and audience playbooks live in [`PLAYS.md`](PLAYS.md).
+> In a Claude Code session here, run `/play product` (or `career` / `audience`).
+
 ## Repository structure
 
 ```
