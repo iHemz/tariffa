@@ -10,10 +10,8 @@ It submits nothing. Filing through NICIS or Trade Window needs accreditation thi
 not have and should not pretend to have. The output is a draft that the user or their licensed
 broker files through the official channel.
 
-<!-- CHECK: replace this line with the real build status before publishing.
-     e.g. "Status: the four-agent pipeline runs end to end on sample shipments; the regulatory
-     knowledge base covers HS chapters 28, 29 and 38." or "Status: scaffolded, docs complete,
-     pipeline in progress." Do not leave this comment in. -->
+**Status: in progress.** The extraction agent is built and verified on a synthetic invoice.
+Classification, compliance (RAG-grounded) and Form M drafting are next. See [`TODO.md`](TODO.md).
 
 ## The problem
 
@@ -113,9 +111,6 @@ A monorepo by folder, not by tooling. Two independent apps in one git repo.
 `CLAUDE.md` holds the index. Start with `docs/07-repository-setup.md`. The product boundary is in
 `docs/01-product-vision.md`, the agent contracts in `docs/03-agent-pipeline.md`, and the schemas
 in `docs/04-data-models.md`.
-
-Product, career and audience playbooks live in `PLAYS.md`. In a Claude Code session here, run
-`/play product`.
 
 ## What would make this real
 
